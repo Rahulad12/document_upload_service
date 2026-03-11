@@ -312,15 +312,8 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
     const actualFile = files[0].file;
     const previewUrl = files[0].preview;
     const isImage = actualFile.type?.startsWith('image/');
-    mutate((node) => {
-      node.file = actualFile as File;
-      node.previewUrl = previewUrl;
-      node.fileType = isImage ? 'image' : 'pdf';
-      node.doesExist = true;
-    });
 
     const base64 = await convertToBase64(actualFile as File);
-
     await uploadDocuments({
       TransactionId: 'string',
       MerchantId: 'string',
@@ -334,6 +327,13 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
           DocumentFile: base64.split(',')[1] as string,
         },
       ],
+    });
+
+    mutate((node) => {
+      node.file = actualFile as File;
+      node.previewUrl = previewUrl;
+      node.fileType = isImage ? 'image' : 'pdf';
+      node.doesExist = true;
     });
   };
 
