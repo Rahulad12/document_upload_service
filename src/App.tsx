@@ -9,19 +9,20 @@ function App() {
     <ReactQueryProvider>
       <RouterProvider router={MainRouter} />
       <Toaster
-        position="bottom-left"
+        position="bottom-right"
         duration={3000}
         closeButton
-        // toastOptions={{
-        //   style: {
-        //     background: "#008eb0",
-        //     color: "white",
-        //     border: "none",
-        //   },
-        //   classNames: {
-        //     closeButton: "bg-white text-[#008eb0] hover:bg-gray-100",
-        //   },
-        // }}
+        richColors
+      // toastOptions={{
+      //   style: {
+      //     background: "#008eb0",
+      //     color: "white",
+      //     border: "none",
+      //   },
+      //   classNames: {
+      //     closeButton: "bg-white text-[#008eb0] hover:bg-gray-100",
+      //   },
+      // }}
       />
     </ReactQueryProvider>
   );

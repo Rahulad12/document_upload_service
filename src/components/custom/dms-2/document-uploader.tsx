@@ -49,7 +49,7 @@ interface DocumentUploaderProps {
   activeDocument?: DocumentNode;
 }
 
-const   DocumentUploader = ({
+const DocumentUploader = ({
   maxFiles = 10,
   maxSize = 5 * 1024 * 1024,
   accept = '*',
@@ -243,10 +243,10 @@ const   DocumentUploader = ({
         </div>
       </div>
 
-      {/* Pending Files Table - Files waiting to be uploaded */}
+      {/* Pending Files Table */}
       {hasPendingFiles && (
         <div className="space-y-3">
-          <div className="rounded-lg border border-amber-200 overflow-hidden relative">
+          <div className="rounded-lg border border-amber-200 overflow-auto relative">
             <Table>
               <TableHeader>
                 <TableRow className="bg-amber-50">
@@ -254,7 +254,6 @@ const   DocumentUploader = ({
                   <TableHead>File Name</TableHead>
                   <TableHead className="w-24">Type</TableHead>
                   <TableHead className="w-24">Size</TableHead>
-                  {/* Action column is always shown so Eye is available for single-file too */}
                   <TableHead className="w-20 text-right sticky right-0 bg-amber-50">
                     Action
                   </TableHead>
@@ -265,7 +264,7 @@ const   DocumentUploader = ({
                   <TableRow key={file.id}>
                     <TableCell>{getFileIcon(file)}</TableCell>
                     <TableCell className="font-medium">
-                      <span className="truncate max-w-[12rem] block">
+                      <span className="truncate max-w-48 block">
                         {file.file?.name}
                       </span>
                     </TableCell>
@@ -279,7 +278,6 @@ const   DocumentUploader = ({
                     </TableCell>
                     <TableCell className="sticky right-0 bg-background p-0 text-right">
                       <div className="flex items-center justify-end">
-                        {/* Eye — preview the file before uploading */}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -290,7 +288,6 @@ const   DocumentUploader = ({
                           <Eye className="h-4 w-4" />
                         </Button>
 
-                        {/* X — only shown for multiple-file mode so user can remove individual files */}
                         {allowMultiple && (
                           <Button
                             variant="ghost"

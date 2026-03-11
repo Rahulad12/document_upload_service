@@ -572,16 +572,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  // SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { DocumentNode } from '@/hooks/use-document';
 import { cn } from '@/lib/utils';
 import { ChevronRight, FileText, Folder } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Logo from '../common/logo';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 interface DocumentStripProps extends Omit<
   React.ComponentProps<typeof Sidebar>,
@@ -598,6 +598,7 @@ interface TreeNodeProps {
   depth?: number;
   selectedDocumentId: string | null;
   onSelectNodeId: (id: string) => void;
+  searchTerm?: string;
 }
 
 const TreeNode = ({
@@ -605,15 +606,30 @@ const TreeNode = ({
   depth = 0,
   selectedDocumentId,
   onSelectNodeId,
+  searchTerm = '',
 }: TreeNodeProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const hasChildren = node.children && node.children.length > 0;
   const isSelected = selectedDocumentId === node.id;
 
+  // Auto-expand if search term matches a child
+  useEffect(() => {
+    if (searchTerm && hasChildren) {
+      const hasMatchingChild = (n: DocumentNode): boolean => {
+        if (n.label.toLowerCase().includes(searchTerm.toLowerCase())) return true;
+        if (n.children) return n.children.some(hasMatchingChild)
+        return false;
+      }
+      if (node.children?.some(hasMatchingChild)) {
+        setIsExpanded(true);
+      }
+    }
+  }, [searchTerm, hasChildren, node.children]);
+
   const handleClick = () => {
     if (hasChildren) {
-      setIsExpanded((prev) => !prev);
+      setIsExpanded((prev: boolean) => !prev);
     } else {
       onSelectNodeId(node.id);
     }
@@ -679,6 +695,7 @@ const TreeNode = ({
               depth={depth + 1 + 1}
               selectedDocumentId={selectedDocumentId}
               onSelectNodeId={onSelectNodeId}
+              searchTerm={searchTerm}
             />
           ))}
         </div>
@@ -687,7 +704,7 @@ const TreeNode = ({
   );
 };
 
-const DocumentStrip = ({
+const DocumentSidebar = ({
   treeDocuments,
   selectedDocumentId,
   onSelectNodeId,
@@ -696,10 +713,31 @@ const DocumentStrip = ({
   ...props
 }: DocumentStripProps) => {
   const { isMobile, open } = useSidebar();
+  const [searchTerm, setSearchTerm] = useState('');
 
   if (isLoading) {
     return <Skeleton className="h-full w-full" />;
   }
+
+  // Filtering logic
+  const filterNodes = (nodes: DocumentNode[], term: string): DocumentNode[] => {
+    if (!term) return nodes;
+
+    return nodes.reduce((acc: DocumentNode[], node) => {
+      const matches = node.label.toLowerCase().includes(term.toLowerCase());
+      const filteredChildren = node.children ? filterNodes(node.children, term) : [];
+
+      if (matches || filteredChildren.length > 0) {
+        acc.push({
+          ...node,
+          children: filteredChildren.length > 0 ? filteredChildren : node.children
+        });
+      }
+      return acc;
+    }, []);
+  };
+
+  const filteredDocuments = filterNodes(treeDocuments, searchTerm);
 
   return (
     <Sidebar
@@ -708,19 +746,32 @@ const DocumentStrip = ({
       collapsible="offcanvas"
       {...props}
     >
-      <SidebarHeader className="p-2 flex flex-row items-center">
-        {open || isMobile ? <Logo /> : <img src="/images/logo.png" className="w-8 h-8" />}
+      <SidebarHeader className="p-2 space-y-2">
+        <div className="flex items-center">
+          {open || isMobile ? <Logo /> : <img src="/images/logo.png" className="w-8 h-8" />}
+        </div>
+        {(open || isMobile) && (
+          <div className="px-2 relative">
+            <Input
+              placeholder="Search documents..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border-primary text-black placeholder:text-primary/50 h-8 text-xs focus-visible:ring-primary/20 focus-visible:border-primary"
+            />
+          </div>
+        )}
       </SidebarHeader>
       <SidebarContent className="gap-0 bg-primary">
         <div className="flex-1 overflow-auto bg-[url('@/assets/images/mountainbg-white.png')] bg-bottom bg-no-repeat bg-contain">
           <SidebarMenu className="gap-0 p-1">
-            {treeDocuments.map((category) => (
+            {filteredDocuments.map((category) => (
               <SidebarMenuItem key={category.id}>
                 <TreeNode
                   node={category}
                   depth={0}
                   selectedDocumentId={selectedDocumentId}
                   onSelectNodeId={onSelectNodeId}
+                  searchTerm={searchTerm}
                 />
               </SidebarMenuItem>
             ))}
@@ -731,4 +782,4 @@ const DocumentStrip = ({
   );
 };
 
-export default DocumentStrip;
+export default DocumentSidebar;

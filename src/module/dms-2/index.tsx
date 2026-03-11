@@ -9,16 +9,15 @@ import { DocumentPreviewProvider } from '@/context/use-preview-documents-context
 const DocumentUploadLayout = memo(() => {
   /**
    * This hooks is used to get documents
-   * @payload TransactionId, MerchantId, ProcessInstanceId
    */
   const {
     data: documentData,
     isLoading: documentLoading,
     error: documentError,
   } = useGetDocuments({
-    TransactionId: 'string',
-    MerchantId: 'string',
-    ProcessInstanceId: 'string',
+    TransactionId: '23232',
+    MerchantId: '23232',
+    ProcessInstanceId: '23232',
   });
 
   const requiredData = useMemo(

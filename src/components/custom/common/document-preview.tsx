@@ -9,8 +9,6 @@ import {
   Printer,
 } from 'lucide-react';
 import { useState, useRef, useEffect, memo, useCallback } from 'react';
-// import type { NormalizedDocument } from '@/types/types';
-// import { useDocumentPreview } from '@/hooks/use-document-preview';
 import { b64toBlob } from '@/utils/helper';
 import type { DocumentNode } from '@/hooks/use-document';
 import type { Dispatch, SetStateAction } from 'react';
@@ -290,7 +288,7 @@ function ImageViewer({ src, label, toggleDetails, setToggleDetails }: { src: str
       {/* Canvas */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-hidden bg-linear-to-br from-slate-50 to-slate-100 relative"
+        className="flex-1 overflow-auto bg-linear-to-br from-slate-50 to-slate-100 relative"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -301,7 +299,7 @@ function ImageViewer({ src, label, toggleDetails, setToggleDetails }: { src: str
         }}
       >
         <div className="h-full w-full flex items-center justify-center p-4">
-          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+          <div className="relative w-full h-full flex items-center justify-center overflow-auto">
             <div
               className="flex items-center justify-center"
               style={{

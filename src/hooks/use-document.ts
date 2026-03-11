@@ -231,7 +231,7 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
           label: doc.DocumentName,
           documentIndexId: doc.DocumentIndex,
           allowedFileExtensions: category.AllowedFileExtensions,
-          doesExist: category.DoesExist || true,
+          doesExist: category.DoesExist,
           children: [],
           allowUpdate: doc.IsAllowedUpdate,
           allowMultiple: doc.IsAllowedMultiple,
@@ -251,7 +251,7 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
             label: sub.DocumentName,
             documentIndexId: sub.DocumentIndex,
             allowedFileExtensions: category.AllowedFileExtensions,
-            doesExist: category.DoesExist || true,
+            doesExist: category.DoesExist,
             children: [],
             allowUpdate: sub.IsAllowedUpdate,
             allowMultiple: sub.IsAllowedMultiple,
@@ -321,7 +321,7 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
 
     const base64 = await convertToBase64(actualFile as File);
 
-    const res = await uploadDocuments({
+    await uploadDocuments({
       TransactionId: 'string',
       MerchantId: 'string',
       WorkItem: 'SME-0000010713-process',
@@ -335,8 +335,6 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
         },
       ],
     });
-    console.log(res);
-    toast.success('Uploaded');
   };
 
   const handleReplace = () =>
@@ -345,11 +343,13 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
       node.previewUrl = undefined;
     });
 
-  const handleDelete = () =>
+  const handleDelete = () => {
     mutate((node) => {
       node.file = undefined;
       node.previewUrl = undefined;
     });
+    toast.success('Document deleted successfully');
+  };
 
   const handleSelectedDocumentNodeId = (id: string) => {
     setActiveId(id);
@@ -359,8 +359,8 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
     if (!documentIndexId) return;
 
     const res = await getDocumentImage({
-      // DocumentIndexId: "50027",
-      DocumentIndexId: documentIndexId,
+      DocumentIndexId: "84809",
+      // DocumentIndexId: documentIndexId,
       MerchantId: 'string',
       TransactionId: 'string',
     });
@@ -389,7 +389,7 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
     return rootIds.map(buildTree);
   }, [rootIds, buildTree]);
 
-
+  console.log(entities, documentsForUI)
   return {
     documents: documentsForUI,
     activeDocument,

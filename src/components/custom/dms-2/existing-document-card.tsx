@@ -1,12 +1,24 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Eye, Plus, Edit, Trash2, X } from 'lucide-react';
+import { FileText, Eye, Plus, Edit, Trash2, X, Trash2Icon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DocumentUploader from './document-uploader';
-import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { DocumentNode } from '@/hooks/use-document';
 import type { FileWithPreview } from '@/hooks/use-file-upload';
+import { toast } from 'sonner';
+import { DOCUMENT_SIZE_LIMIT } from '@/runtime-config';
 
 interface ExistingDocumentCardProps {
   document: DocumentNode;
@@ -64,10 +76,10 @@ export function ExistingDocumentCard({
   };
 
   const handleDeleteClick = () => {
-    if (window.confirm(`Are you sure you want to delete ${document.label}?`)) {
-      onDelete();
-    }
+    toast.success("Deleted Successfully")
+    onDelete();
   };
+  const documentSizeLimit = DOCUMENT_SIZE_LIMIT && DOCUMENT_SIZE_LIMIT * 1024 * 1024;
 
   return (
     <div className="bg-white   space-y-4   h-screen overflow-y-scroll">
@@ -146,18 +158,35 @@ export function ExistingDocumentCard({
 
           {/* Delete Button - Only if allowDelete */}
           {allowDelete && (
-            <Button
-              onClick={handleDeleteClick}
-              variant="outline"
-              size="sm"
-              className={cn(
-                'border-red-300 text-red-600 hover:bg-red-50',
-                (!allowMultiple || !allowUpdate) && 'col-span-2'
-              )}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    'border-red-300 text-red-600 hover:bg-red-50',
+                    (!allowMultiple || !allowUpdate) && 'col-span-2'
+                  )}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent size="sm">
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                    <Trash2Icon />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle onClick={handleDeleteClick}>Are you sure you want to delete this document?</AlertDialogTitle>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
+                  <AlertDialogAction variant="destructive">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+
           )}
         </div>
       </div>
@@ -180,7 +209,7 @@ export function ExistingDocumentCard({
           </div>
 
           <DocumentUploader
-            maxSize={5 * 1024 * 1024}
+            maxSize={documentSizeLimit}
             onFilesChange={
               actionMode === 'add' ? handleFilesAdd : handleFilesUpdate
             }
@@ -218,6 +247,8 @@ export function ExistingDocumentCard({
           </div>
         </div>
       </div>
+
+
     </div>
   );
 }

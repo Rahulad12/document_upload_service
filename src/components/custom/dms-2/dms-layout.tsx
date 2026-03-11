@@ -4,9 +4,9 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import type { ReactNode } from 'react';
-import DocumentStrip from './document-navbar-strip';
 import type { DocumentNode } from '@/hooks/use-document';
 import { useIsMobile } from '@/hooks/use-mobile';
+import DocumentSidebar from './document-sidebar';
 
 interface DMSLayoutProps {
   children: ReactNode;
@@ -26,14 +26,14 @@ const DMSLayout = ({
   const isMobile = useIsMobile();
   return (
     <SidebarProvider>
-      <DocumentStrip
+      <DocumentSidebar
         treeDocuments={documents}
         selectedDocumentId={activeIndex}
         onSelectNodeId={onSelectDocument}
         className="border-r"
       />
-      <SidebarInset className={`flex flex-col h-screen ${isMobile ? 'overflow-auto' : 'overflow-hidden'}`}>
-        <main className={`relative flex-1 h-fit ${isMobile ? 'overflow-auto' : 'overflow-hidden'}`}>
+      <SidebarInset className={`flex flex-col h-screen ${isMobile ? 'overflow-auto' : 'overflow-auto'}`}>
+        <main className={`relative flex-1 h-fit ${isMobile ? 'overflow-auto' : 'overflow-auto'}`}>
           <div className="h-full flex flex-col w-full">
             <div className="bg-[url('/src/assets/images/mountainbg-white.png')]">
               {children}
