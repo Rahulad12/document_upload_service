@@ -240,9 +240,21 @@ export function ExistingDocumentCard({
         </h5>
         <div className="space-y-1 text-xs text-slate-600">
           <div className="flex items-center justify-between">
-            <span>Document Index:</span>
+            <span>Remarks:</span>
             <span className="font-medium text-slate-800">
-              {document.documentIndexId || 'N/A'}
+              {document.remarks || 'N/A'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Created At:</span>
+            <span className="font-medium text-slate-800">
+              {document.creartedDate || 'N/A'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Created By:</span>
+            <span className="font-medium text-slate-800">
+              {document.createdBy || 'N/A'}
             </span>
           </div>
         </div>

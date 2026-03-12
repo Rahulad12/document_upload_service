@@ -27,6 +27,7 @@ export interface UploadDocumentList {
   DocumentName: string
   DocumentExtension: string
   DocumentFile: string
+  DocumentRemarks: string
 }
 export interface UploadDocumentRequestType {
   TransactionId: string
@@ -50,6 +51,8 @@ export interface DMSRequiredDocument {
   MandaryDocumentsCount: number
   AllowedFileExtensions: string[]
   Documents: Document[]
+  CreatedBy: string
+  CreatedDate: string
 }
 
 export interface Document {
@@ -62,6 +65,8 @@ export interface Document {
   IsRequired: boolean
   CreatedBy: string
   CreatedDate: string
+  Remarks: string
+  DoesExist: boolean
   SubDocuments?: SubDocument[]
 }
 
@@ -71,9 +76,12 @@ export interface SubDocument {
   DocumentIndex: string
   IsAllowedMultiple: boolean
   IsAllowedUpdate: boolean
+  IsRequired: boolean
   IsAllowedDelete: boolean
   CreatedBy: string
   CreatedDate: string
+  Remarks: string
+  DoesExist: boolean
 }
 
 

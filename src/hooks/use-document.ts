@@ -156,7 +156,7 @@
 // }
 
 // changed
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
   useGetDocumentImage,
@@ -180,11 +180,12 @@ export interface DocumentNode {
   allowDelete?: boolean;
   isRequired: boolean;
   label: string;
-
+  creartedDate: string;
+  createdBy: string;
   documentIndexId?: string;
   allowedFileExtensions?: string[];
   mandatoryDocumentCount?: number;
-
+  remarks?: string;
   doesExist?: boolean;
 
   file?: File;
@@ -199,7 +200,7 @@ export interface DocumentNode {
 export function useDocument(initialDocuments: DMSRequiredDocument[]) {
   const { mutateAsync: getDocumentImage, isPending } = useGetDocumentImage();
   //NORMALIZE (FIXED STRUCTURE - SCALABLE)
-  const normalize = (docs: DMSRequiredDocument[]) => {
+  const normalize = useCallback((docs: DMSRequiredDocument[]) => {
     const entities: Record<string, DocumentNode> = {};
     const rootIds: string[] = [];
 
@@ -217,6 +218,8 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
         allowUpdate: category.IsAllowedUpdate,
         allowMultiple: category.IsAllowedMultiple,
         isRequired: category.IsRequired,
+        createdBy: category.CreatedBy,
+        creartedDate: category.CreatedDate,
       };
 
       rootIds.push(categoryId);
@@ -231,12 +234,15 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
           label: doc.DocumentName,
           documentIndexId: doc.DocumentIndex,
           allowedFileExtensions: category.AllowedFileExtensions,
-          doesExist: category.DoesExist,
+          doesExist: doc.DoesExist,
           children: [],
           allowUpdate: doc.IsAllowedUpdate,
           allowMultiple: doc.IsAllowedMultiple,
           allowDelete: doc.IsAllowedDelete,
           isRequired: doc.IsRequired,
+          remarks: doc.Remarks,
+          creartedDate: doc.CreatedDate,
+          createdBy: doc.CreatedBy,
         };
 
         entities[categoryId].children.push(docId);
@@ -251,12 +257,15 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
             label: sub.DocumentName,
             documentIndexId: sub.DocumentIndex,
             allowedFileExtensions: category.AllowedFileExtensions,
-            doesExist: category.DoesExist,
+            doesExist: sub.DoesExist,
             children: [],
             allowUpdate: sub.IsAllowedUpdate,
             allowMultiple: sub.IsAllowedMultiple,
             allowDelete: sub.IsAllowedDelete,
-            isRequired: doc.IsRequired,
+            isRequired: sub.IsRequired,
+            remarks: sub.Remarks,
+            creartedDate: sub.CreatedDate,
+            createdBy: sub.CreatedBy,
           };
 
           entities[docId].children.push(subId);
@@ -265,15 +274,20 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
     });
 
     return { entities, rootIds };
-  };
+  }, []);
+
   const [{ entities, rootIds }, setStore] = useState(() =>
     normalize(initialDocuments)
   );
 
+  // Auto-update state when initialDocuments changes (refetch)
+  useEffect(() => {
+    setStore(normalize(initialDocuments));
+  }, [initialDocuments, normalize]);
+
   const [activeId, setActiveId] = useState<string | null>(null);
 
   //ACTIVE DOCUMENT (COMMON SHAPE FOR ALL LEVELS)
-
   const activeDocument = useMemo<DocumentNode | null>(() => {
     return activeId ? (entities[activeId] ?? null) : null;
   }, [activeId, entities]);
@@ -303,37 +317,44 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
     [activeId]
   );
 
-  //HANDLERS (YOUR LOGIC PRESERVED)
+  //HANDLERS
+  // document upload handler
   const { mutateAsync: uploadDocuments, isPending: documentUploadLoading } =
     useUploadDocuments();
   const handleUpload = async (files: FileWithPreview[]) => {
-    if (!activeId) return;
+    if (!activeId || !activeDocument) return;
 
-    const actualFile = files[0].file;
-    const previewUrl = files[0].preview;
-    const isImage = actualFile.type?.startsWith('image/');
+    // Convert all files to base64 and build the document list
+    const documentList = await Promise.all(
+      files.map(async (fileItem) => {
+        const base64 = await convertToBase64(fileItem.file as File);
+        return {
+          DocumentName: activeDocument.label as string,
+          DocumentExtension:
+            fileItem.file.type?.split('/')[0] === 'image' ? 'jpeg' : 'pdf',
+          DocumentFile: base64.split(',')[1] as string,
+          DocumentRemarks: "test_remarks",
+        };
+      })
+    );
 
-    const base64 = await convertToBase64(actualFile as File);
+    // Upload all documents at once
     await uploadDocuments({
       TransactionId: 'string',
       MerchantId: 'string',
       WorkItem: 'SME-0000010713-process',
-      DocumentList: [
-        {
-          DocumentName: activeDocument?.label as string,
-          // DocumentName: "Pan",
-          DocumentExtension:
-            actualFile?.type?.split('/')[0] === 'image' ? 'jpeg' : 'pdf',
-          DocumentFile: base64.split(',')[1] as string,
-        },
-      ],
+      DocumentList: documentList,
     });
 
-    mutate((node) => {
-      node.file = actualFile as File;
-      node.previewUrl = previewUrl;
-      node.fileType = isImage ? 'image' : 'pdf';
-      node.doesExist = true;
+    // Update local state for each uploaded file (e.g., add to a list)
+    files.forEach((fileItem) => {
+      const isImage = fileItem.file.type?.startsWith('image/');
+      mutate((node) => {
+        node.file = fileItem.file as File;
+        node.previewUrl = fileItem.preview;
+        node.fileType = isImage ? 'image' : 'pdf';
+        node.doesExist = true;
+      });
     });
   };
 
@@ -359,8 +380,8 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
     if (!documentIndexId) return;
 
     const res = await getDocumentImage({
-      DocumentIndexId: "84809",
-      // DocumentIndexId: documentIndexId,
+      // DocumentIndexId: "84809",
+      DocumentIndexId: documentIndexId,
       MerchantId: 'string',
       TransactionId: 'string',
     });
@@ -389,7 +410,6 @@ export function useDocument(initialDocuments: DMSRequiredDocument[]) {
     return rootIds.map(buildTree);
   }, [rootIds, buildTree]);
 
-  console.log(entities, documentsForUI)
   return {
     documents: documentsForUI,
     activeDocument,

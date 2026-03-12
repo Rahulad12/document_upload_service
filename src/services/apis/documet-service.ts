@@ -6,8 +6,11 @@ import axiosInstance from '../axiosInstance';
 //   return axiosInstance.get('/data');
 // };
 const getDocumentsDetails = (payload: DocumentRequestType) => {
-  return axiosInstance.post('/FetchDocument/DocumentDetails', payload);
+  return axiosInstance.post('/FetchDocument/DocumentDetailsNew', payload);
 };
+// const getDocumentsDetails = (payload: DocumentRequestType) => {
+//   return axiosInstance.post('/FetchDocument/DocumentDetails', payload);
+// };
 
 const getDocumentImage = (payload: DocumentImageRequestType) => {
   return axiosInstance.post('/BPM/downloaddocuments', payload)

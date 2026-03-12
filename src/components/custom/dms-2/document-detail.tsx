@@ -5,7 +5,7 @@ import DocumentPreview from '../common/document-preview';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExistingDocumentCard } from './existing-document-card';
-import { useCallback, useState, type Dispatch, type SetStateAction } from 'react';
+import { Activity, useCallback, useState, type Dispatch, type SetStateAction } from 'react';
 import type { DocumentNode } from '@/hooks/use-document';
 import type { FileWithPreview } from '@/hooks/use-file-upload';
 import { Button } from '@/components/ui/button';
@@ -124,91 +124,94 @@ const DocumentDetail = ({
     <div className="grid grid-cols-1 lg:grid-cols-4 h-full bg-linear-to-b from-slate-50 to-slate-100">
 
       {/* Left Panel  Header + Upload Section */}
-      <div className={cn(
-        "lg:col-span-1 flex flex-col h-full overflow-auto bg-white border-r border-slate-200",
-        toggleDetails && "hidden"
-      )}>
+      <Activity mode={!toggleDetails ? 'visible' : 'hidden'}>
+        <div className={cn(
+          "lg:col-span-1 flex flex-col h-full overflow-auto bg-white border-r border-slate-200",
+          // toggleDetails && "hidden"
+        )}>
 
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white shadow-sm sticky top-0 z-10">
-          <div className="flex-1 min-w-0 flex gap-2">
-            <h2 className="text-base font-bold text-slate-800 capitalize truncate">
-              {activeDocument?.label}
-            </h2>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              {activeDocument?.isRequired && (
-                <Badge
-                  variant="outline"
-                  className="text-xs bg-amber-500 text-primary-foreground"
-                >
-                  Required
-                </Badge>
-              )}
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white shadow-sm sticky top-0 z-10">
+            <div className="flex-1 min-w-0 flex gap-2">
+              <h2 className="text-base font-bold text-slate-800 capitalize truncate">
+                {activeDocument?.label}
+              </h2>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                {activeDocument?.isRequired && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs bg-amber-500 text-primary-foreground"
+                  >
+                    Required
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        {/* Document Upload/Details Section */}
-        <div className="flex-1 p-4 space-y-6 overflow-auto">
-          {/* Existing Document Card  this will only show if does exist is true */}
-          {doesExist ? (
-            <ExistingDocumentCard
-              key={activeDocument.id}
-              document={activeDocument}
-              onPreview={handlePreviewExisting}
-              onAdd={handleAdd}
-              onUpdate={handleUpdate}
-              onDelete={handleDeleteClick}
-              isLoadingFile={isLoadingFile}
-              onPreviewFile={handlePreviewFile}
-            />
-          ) : (
-            /* Regular Upload Flow this will only show if document doesn't exist */
-            <div className="bg-white border border-slate-200 rounded-xl p-5">
-              {!hasUploadedFile && !hasPreviewData && (
-                <div className="space-y-4">
-                  <DocumentUploader
-                    key={activeDocument.id}
-                    maxSize={documentSizeLimit}
-                    onFilesChange={onUpload}
-                    onReplace={onReplace}
-                    onDelete={onDelete}
-                    onPreviewFile={handlePreviewFile}
-                    className="bg-slate-50"
-                    defaultLabel={activeDocument?.label}
-                    activeDocument={activeDocument}
-                    accept={activeDocument.allowedFileExtensions?.join(', ')}
-                  />
+          {/* Document Upload/Details Section */}
+          <div className="flex-1 p-4 space-y-6 overflow-auto">
+            {/* Existing Document Card  this will only show if does exist is true */}
+            {doesExist ? (
+              <ExistingDocumentCard
+                key={activeDocument.id}
+                document={activeDocument}
+                onPreview={handlePreviewExisting}
+                onAdd={handleAdd}
+                onUpdate={handleUpdate}
+                onDelete={handleDeleteClick}
+                isLoadingFile={isLoadingFile}
+                onPreviewFile={handlePreviewFile}
+              />
+            ) : (
+              /* Regular Upload Flow this will only show if document doesn't exist */
+              <div className="bg-white border border-slate-200 rounded-xl p-5">
+                {!hasUploadedFile && !hasPreviewData && (
+                  <div className="space-y-4">
+                    <DocumentUploader
+                      key={activeDocument.id}
+                      maxSize={documentSizeLimit}
+                      onFilesChange={onUpload}
+                      onReplace={onReplace}
+                      onDelete={onDelete}
+                      onPreviewFile={handlePreviewFile}
+                      className="bg-slate-50"
+                      defaultLabel={activeDocument?.label}
+                      activeDocument={activeDocument}
+                      accept={activeDocument?.allowedFileExtensions?.map(ext => `.${ext}`).join(', ') || ''}
+                    />
 
-                  <div className="text-xs text-slate-500 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span>Maximum file size:</span>
-                      <span className="font-medium">5 MB</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Allowed formats:</span>
-                      <span className="font-medium">
-                        {activeDocument.allowedFileExtensions?.join(', ') ||
-                          'PDF, JPEG, PNG'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Multiple files:</span>
-                      <span
-                        className={cn(
-                          'font-medium',
-                          allowMultiple ? 'text-green-600' : 'text-red-600'
-                        )}
-                      >
-                        {allowMultiple ? 'Allowed' : 'Not allowed'}
-                      </span>
+                    <div className="text-xs text-slate-500 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span>Maximum file size:</span>
+                        <span className="font-medium">5 MB</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Allowed formats:</span>
+                        <span className="font-medium">
+                          {activeDocument.allowedFileExtensions?.join(', ') ||
+                            'PDF, JPEG, PNG'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Multiple files:</span>
+                        <span
+                          className={cn(
+                            'font-medium',
+                            allowMultiple ? 'text-green-600' : 'text-red-600'
+                          )}
+                        >
+                          {allowMultiple ? 'Allowed' : 'Not allowed'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </Activity>
+
 
       {/* Right Panel  Document Preview */}
       <div className={cn(

@@ -52,14 +52,14 @@ interface DocumentUploaderProps {
 const DocumentUploader = ({
   maxFiles = 10,
   maxSize = 5 * 1024 * 1024,
-  accept = '*',
+  accept = '',
   className,
   onFilesChange,
   onPreviewFile,
   defaultLabel,
   activeDocument,
 }: DocumentUploaderProps) => {
-
+  console.log("accept", accept);
   const [uploadFiles, setUploadFiles] = useState<FileUploadItem[]>([]);
   const [pendingFiles, setPendingFiles] = useState<FileUploadItem[]>([]);
 
@@ -156,7 +156,7 @@ const DocumentUploader = ({
   ] = useFileUpload({
     maxFiles: allowMultiple ? maxFiles : 1,
     maxSize,
-    accept,
+    accept: accept,
     multiple: allowMultiple,
     initialFiles: [],
     onFilesChange: (newFiles) => {

@@ -582,6 +582,7 @@ import { useState, useEffect } from 'react';
 import Logo from '../common/logo';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface DocumentStripProps extends Omit<
   React.ComponentProps<typeof Sidebar>,
@@ -669,7 +670,13 @@ const TreeNode = ({
           )}
 
           <span className="text-sm font-medium truncate">
-            {node.label}{' '}
+            <Tooltip>
+              <TooltipTrigger>{node.label}</TooltipTrigger>
+              <TooltipContent className='max-w-[250px]'>
+                <p>Label: {node.label}</p>
+                <p className='font-normal wrap-break'>Remarks: {node.remarks}</p>
+              </TooltipContent>
+            </Tooltip>
             {!hasChildren && node.isRequired && (
               <span className="text-red-400 text-xs font-bold">*</span>
             )}

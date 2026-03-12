@@ -17,7 +17,7 @@ const DocumentUploadLayout = memo(() => {
   } = useGetDocuments({
     TransactionId: '23232',
     MerchantId: '23232',
-    ProcessInstanceId: '23232',
+    ProcessInstanceId: 'SME-0000010713-process',
   });
 
   const requiredData = useMemo(
