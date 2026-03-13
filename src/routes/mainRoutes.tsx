@@ -5,11 +5,11 @@ import {
 import { DMSRoutes } from "./dms-routes";
 import PageNotFound from "@/components/custom/common/page-not-found";
 
-const MainRouter =createBrowserRouter([
-    ...DMSRoutes,
-    {
-      path: "*",
-      Component: PageNotFound,
-    }
+const MainRouter = createBrowserRouter([
+  ...DMSRoutes,
+  {
+    path: "*",
+    Component: PageNotFound,
+  }
 ])
 export { MainRouter };

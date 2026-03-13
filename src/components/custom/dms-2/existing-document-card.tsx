@@ -217,7 +217,7 @@ export function ExistingDocumentCard({
             className="bg-slate-50"
             defaultLabel={document.label}
             activeDocument={document}
-            accept={document.allowedFileExtensions?.join(',') || ''}
+            accept={document.allowedFileExtensions?.map(x => `.${x}`).join(",") || ''}
           />
 
           {/* <div className="flex gap-2">
