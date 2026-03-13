@@ -127,7 +127,6 @@ const DocumentDetail = ({
       <Activity mode={!toggleDetails ? 'visible' : 'hidden'}>
         <div className={cn(
           "lg:col-span-1 flex flex-col h-full overflow-auto bg-white border-r border-slate-200",
-          // toggleDetails && "hidden"
         )}>
 
           {/* Header */}
